@@ -1,0 +1,72 @@
+---
+# This Ansible playbook deploys various Kubernetes resources
+
+- name: Deploy Kubernetes Resources for Unqork Take Home  # Play name
+  hosts: localhost  # Target host (local in this case)
+
+  tasks:  # List of tasks to execute
+
+    # Include existing Kubernetes config, assuming it's stored at the default location
+    - name: Include Kubernetes Configuration
+      include_vars:
+        file: ~/.kube/config 
+        name: UnqorkTakeHome
+    
+    # Set a fact for the Kubernetes namespace to be used
+    - name: Set Kubernetes Namespace
+      set_fact:
+        kube_namespace: steve-test
+
+    # Create a Kubernetes namespace
+    - name: Create Namespace
+      k8s:
+        name: "{{ kube_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present  # Ensure the namespace exists
+
+    # Create a ConfigMap in the defined namespace
+    - name: Create ConfigMap
+      k8s:
+        name: steve-test
+        namespace: "{{ kube_namespace }}"
+        api_version: v1
+        kind: ConfigMap
+        state: present  # Ensure the ConfigMap exists
+        definition:
+          data:
+            APP_ENV: "production"
+            DEBUG: "false"
+
+    # Create a Secret in the defined namespace
+    - name: Create Secret
+      k8s:
+        name: steve-test-key
+        namespace: "{{ kube_namespace }}"
+        api_version: v1
+        kind: Secret
+        state: present  # Ensure the Secret exists
+        definition:
+          data:
+            API_KEY: "{{ 'steve-test' | b64encode }}"
+
+    # Deploy a Redis StatefulSet (this is a placeholder; you'll need to provide an actual definition)
+    - name: Deploy Redis StatefulSet
+      k8s:
+        name: steve-redis
+        namespace: "{{ kube_namespace }}"
+        kind: StatefulSet
+        state: present
+        definition:
+          # StatefulSet definition here
+
+    # Extra Credit: Deploy a Horizontal Pod Autoscaler (this is a placeholder; you'll need to provide an actual definition)
+    - name: Create Horizontal Pod Autoscaler
+      k8s:
+        name: steve-hpa
+        namespace: "{{ kube_namespace }}"
+        api_version: autoscaling/v2beta2
+        kind: HorizontalPodAutoscaler
+        state: present
+        definition:
+          # HPA definition here

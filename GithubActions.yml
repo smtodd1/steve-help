@@ -1,0 +1,21 @@
+# This YAML file sets up the GitHub Actions CI/CD pipeline
+name: CI/CD Pipeline
+
+# Trigger this workflow on push to the 'main' branch
+on:
+  push:
+    branches:
+      - main
+
+# Define jobs
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Run this job on an Ubuntu machine
+
+    # Sequence of tasks
+    steps:
+      - name: Checkout code  # Checkout the repository content to the GitHub Actions runner
+        uses: actions/checkout@v2
+      
+      - name: Run Ansible Playbook  # Run your Ansible playbook
+        run: ansible-playbook playbook.yml
